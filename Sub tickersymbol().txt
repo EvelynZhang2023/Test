@@ -1,0 +1,111 @@
+Sub tickersymbol()
+  Dim ws As Worksheet
+
+         ' Loop through all of the worksheets in the active workbook.
+     For Each ws In Worksheets
+     
+
+   ws.Range("I1").Value = "Ticker"
+   ws.Range("J1").Value = "Yearlychange"
+   ws.Range("K1").Value = "Percentchange"
+   ws.Range("L1").Value = "total Stockvolume"
+   ws.Range("P1").Value = "Ticker"
+   ws.Range("Q1").Value = "Value"
+   ws.Range("O2").Value = "Greatest%increase"
+   ws.Range("O3").Value = "Greatest%decrease"
+   ws.Range("O4").Value = "Greatesttotalvolume"
+   
+   
+ ' Set an initial variable for holding the total volume
+  Dim TickerVolume As Double
+  TickerVolume = 0
+
+  ' Keep track of the location for each ticker in the summary table
+  Dim Summary_Table_Row As Double
+  Summary_Table_Row = 2
+  Dim openrow As Double
+  openrow = 2
+  
+  
+  last_row = ws.Cells(Rows.Count, "A").End(xlUp).Row
+
+  ' Loop through ticker
+  For i = 2 To last_row
+
+    ' Check if we are still within the same ticker, if it is not...
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+
+      ' Set the ticker
+      Ticker = ws.Cells(i, 1).Value
+
+      ' Add to the tickervolume
+      TickerVolume = TickerVolume + ws.Cells(i, 7).Value
+
+      ' Print the ticker in the Summary Table
+      ws.Range("I" & Summary_Table_Row).Value = Ticker
+      
+      closingprice = ws.Cells(i, 6).Value
+      openingprice = ws.Cells(openrow, 3).Value
+      yearlychange = closingprice - openingprice
+      percentagechange = yearlychange / openingprice
+      ws.Range("J" & Summary_Table_Row).Value = yearlychange
+      ws.Range("k" & Summary_Table_Row).Value = percentagechange
+      ws.Range("k" & Summary_Table_Row).NumberFormat = "0.00%"
+      
+
+      ' Print the tickervolume to the Summary Table
+      ws.Range("L" & Summary_Table_Row).Value = TickerVolume
+      
+      If ws.Range("J" & Summary_Table_Row).Value > 0 Then
+        ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+      ElseIf ws.Range("J" & Summary_Table_Row).Value < 0 Then
+        ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+      End If
+      
+    
+      ' Add one to the summary table row
+      Summary_Table_Row = Summary_Table_Row + 1
+      
+      ' Reset the Ticker
+      TickerVolume = 0
+      openrow = i + 1
+
+    ' If the cell immediately following a row is the same brand...
+    Else
+
+      ' Add to the TickerVolume
+      TickerVolume = TickerVolume + ws.Cells(i, 7).Value
+
+    End If
+    
+  Next i
+  
+   Dim greatestincrease As Double
+   Dim greatestdecrease As Double
+   Dim greatestvolume As Double
+   
+   greatestincrease = WorksheetFunction.Max(ws.Range("K2:K92"))
+   ws.Range("Q2") = greatestincrease
+   greatestdecrease = WorksheetFunction.Min(ws.Range("K2:K92"))
+   ws.Range("Q3") = greatestdecrease
+   greatestvolume = WorksheetFunction.Max(ws.Range("L2:L92"))
+   ws.Range("Q4") = greatestvolume
+   
+   last_row2 = ws.Cells(Rows.Count, "I").End(xlUp).Row
+   For i = 2 To last_row2
+   If ws.Cells(i, 11).Value = greatestincrease Then
+      ws.Range("P2") = ws.Cells(i, 9).Value
+   End If
+   If ws.Cells(i, 11).Value = greatestdecrease Then
+      ws.Range("P3") = ws.Cells(i, 9).Value
+   End If
+   If ws.Cells(i, 12).Value = greatestvolume Then
+      ws.Range("P4") = ws.Cells(i, 9).Value
+   End If
+   Next i
+   
+   
+  Next ws
+  
+
+End Sub
